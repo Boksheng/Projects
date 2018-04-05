@@ -328,7 +328,7 @@ BsmtUnfSF: Unfinished square feet of basement area
 
 TotalBsmtSF: Total square feet of basement area
 
-Heating: Type of heating
+: Type of heating
 		
        Floor	Floor Furnace
        GasA	Gas forced warm air furnace
