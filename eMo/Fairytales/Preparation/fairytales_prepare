@@ -1,0 +1,251 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import sys\n",
+    "import os\n",
+    "import time\n",
+    "import os\n",
+    "from nltk.corpus import stopwords\n",
+    "from nltk.stem.porter import PorterStemmer\n",
+    "import string\n",
+    "import nltk\n",
+    "import random\n",
+    "import unicodedata\n",
+    "import pandas as pd"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "NLTK_STOPWORDS = set(stopwords.words('english'))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def lowercase(s):\n",
+    "        return s.lower()\n",
+    "    \n",
+    "def tokenize(s):\n",
+    "    token_list = nltk.word_tokenize(s)\n",
+    "    return token_list\n",
+    "\n",
+    "def remove_punctuation( s):\n",
+    "    return s.translate(None, string.punctuation)\n",
+    "\n",
+    "def remove_numbers( s):\n",
+    "    return s.translate(None, string.digits)\n",
+    "\n",
+    "def remove_stopwords( token_list):\n",
+    "    exclude_stopwords = lambda token : token not in NLTK_STOPWORDS\n",
+    "    return filter(exclude_stopwords, token_list)\n",
+    "\n",
+    "def stemming_token_list( token_list):\n",
+    "    STEMMER = PorterStemmer()\n",
+    "    \n",
+    "    #print token_list.decode('utf-8')\n",
+    "    return [STEMMER.stem(tok.decode('utf-8')) for tok in token_list]\n",
+    "\n",
+    "def restring_tokens( token_list):\n",
+    "    return ' '.join(token_list)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Function to clean\n",
+    "def cleanDataset(line):\n",
+    "    cleanData = ''\n",
+    "    line = lowercase(line)\n",
+    "    printable = set(string.printable)\n",
+    "    line = filter(lambda x: x in printable, line)\n",
+    "    line = remove_punctuation(line)\n",
+    "    line = remove_numbers(line)\n",
+    "    token_list = tokenize(line)\n",
+    "    token_list = remove_stopwords(token_list)\n",
+    "    \n",
+    "    #token_list = stemming_token_list(token_list)\n",
+    "    for words in token_list:\n",
+    "        cleanData+=words+' '\n",
+    "    return cleanData"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Read the data\n",
+    "Data = pd.read_csv('fairy_org.txt',header=None)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>0</th>\n",
+       "      <th>1</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>neutral</td>\n",
+       "      <td>NEAR the grass-covered rampart which encircles...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>neutral</td>\n",
+       "      <td>Balsams and other flowers greet us from the lo...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>neutral</td>\n",
+       "      <td>The building is the Warton Almshouse.</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>neutral</td>\n",
+       "      <td>Look! at the window there leans an old maid.</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>sadness</td>\n",
+       "      <td>She plucks the withered leaf from the balsam, ...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "         0                                                  1\n",
+       "0  neutral  NEAR the grass-covered rampart which encircles...\n",
+       "1  neutral  Balsams and other flowers greet us from the lo...\n",
+       "2  neutral              The building is the Warton Almshouse.\n",
+       "3  neutral       Look! at the window there leans an old maid.\n",
+       "4  sadness  She plucks the withered leaf from the balsam, ..."
+      ]
+     },
+     "execution_count": 25,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "Data.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{'joy': 1610, 'sadness': 831, 'neutral': 10139, 'disgust': 463, 'anger': 730, 'surprise': 832, 'fear': 697}\n"
+     ]
+    }
+   ],
+   "source": [
+    "list1 = []\n",
+    "dict1 = {}\n",
+    "\n",
+    "for i in range (len(Data[0])):\n",
+    "    if Data[0][i] not in dict1.keys():\n",
+    "            dict1[Data[0][i]]=1\n",
+    "    else:\n",
+    "        dict1[Data[0][i]]+=1\n",
+    "    line = Data[0][i]+'|'+cleanDataset(Data[1][i])\n",
+    "    list1.append(line)\n",
+    "    \n",
+    "print dict1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "\n",
+    "random.shuffle(list1)\n",
+    "\n",
+    "c = 0\n",
+    "f = open('fairy_org.txt','w')\n",
+    "for i in range(int(len(list1))):\n",
+    "    #print list[i]\n",
+    "    if c < 10:\n",
+    "        #print list[i][4:]\n",
+    "        #print list[i]\n",
+    "        c = c+ 1        \n",
+    "    index = list1[i].index('|')\n",
+    "    f.write(list1[i][:index]+'\\t'+list1[i][index+1:])\n",
+    "    f.write('\\n')\n",
+    "    #train_data.append(list1[i][index+1:])\n",
+    "    #train_labels.append(list1[i][:index])\n",
+    "f.close()"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 2",
+   "language": "python",
+   "name": "python2"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 2
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython2",
+   "version": "2.7.14"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
